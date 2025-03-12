@@ -1,0 +1,7 @@
+Flask
+pytesseract
+Pillow
+bcrypt
+datetime
+uuid
+bleach

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
+    <meta charset="UTF-8" />
+    <title>{% block title %}{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    {% block styles %} {% endblock %}
+  </head>
+
+  <body>
+    <header>
+      <div class="navbar">
+        <div class="navbar-container">
+          <div class="logo">
+            <h1>WriteWise</h1>
+          </div>
+          <div class="links">
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('register') }}">Register</a>
+            <a href="#contact">About</a>
+            <a href="#about">Contact us</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    {% block body %} {% endblock%} {% block scripts %} {% endblock %}
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+  </body>
+</html>

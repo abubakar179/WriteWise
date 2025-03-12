@@ -1,0 +1,116 @@
+{% extends "layout.html" %} {% block title %}Dashboard | WriteWise{% endblock %}
+{% block body %}
+<h1>Welcome {{ username }}!</h1>
+
+<div class="recent-documents">
+  <h2>Your recent documents:</h2>
+  {% if recent_documents %}
+  <ul>
+    {% for doc in recent_documents %}
+    <li>
+      <a href="{{ url_for('view_document', document_id=doc[0]) }}"
+        >{{ doc[1] }}</a
+      >
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>You have no documents. Make a new one to get started!</p>
+  {% endif %}
+</div>
+
+<div class="new-documents">
+  <h2>Create a new document:</h2>
+  <form action="{{ url_for('create_document') }}" method="POST">
+    <p>Document title: <input type="text" name="document_title" required /></p>
+    <p>
+      Folder:
+      <select name="folder_id" id="folderSelect" required>
+        <option value="" disabled selected>Select a folder</option>
+        <option value="new">Create a new folder</option>
+        {% for folder in user_folders %}
+        <option value="{{ folder[0] }}">{{ folder[1] }}</option>
+        {% endfor %}
+      </select>
+    </p>
+    <p id="newFolderInput" style="display: none">
+      New folder name:
+      <input type="text" name="new_folder_name" id="newFolderName" />
+    </p>
+    <p>
+      <button type="submit" value="Create Document">Create Document</button>
+    </p>
+  </form>
+</div>
+
+<div id="browse-folders">
+  <h2>Browse folders:</h2>
+  {% if user_folders %}
+  <ul>
+    {% for folder in user_folders %}
+    <li class="folder-btn" data-folder-id="{{ folder[0] }}">{{ folder[1] }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>No folders found. Create one above!</p>
+  {% endif %}
+</div>
+
+<div id="folder-contents">
+  <h3>Folder Contents</h3>
+  <ul id="folder-doc-list"></ul>
+</div>
+
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // for dashboard: check if "create new folder" was selected
+  const newFolderInput = document.getElementById("newFolderInput");
+  const folderSelect = document.getElementById("folderSelect");
+
+  function checkFolderSelection() {
+    if (folderSelect.value === "new") {
+      newFolderInput.style.display = "block";
+    } else {
+      newFolderInput.style.display = "none";
+    }
+  }
+
+  checkFolderSelection();
+
+  folderSelect.addEventListener("change", function () {
+    checkFolderSelection();
+  });
+
+  const folderButtons = document.querySelectorAll(".folder-btn");
+  const folderContents = document.getElementById("folder-doc-list");
+
+  folderButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const folderId = this.dataset.folderId;
+
+      fetch(`/fetch_folder_contents/${folderId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          folderContents.innerHTML = ""; // Clear previous content
+
+          if (data.documents.length === 0) {
+            folderContents.innerHTML = "<p>No documents found in this folder.</p>";
+            return;
+          }
+
+          data.documents.forEach((doc) => {
+            const li = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = `/view_document/${doc[0]}`;
+            link.textContent = doc[1];
+            li.appendChild(link);
+            folderContents.appendChild(li);
+          });
+        })
+        .catch((error) => console.error("Error loading folder contents:", error));
+    });
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "layout.html" %} {% block title %} {{ document[2] }} | WriteWise {%
+endblock %} {% block styles %}
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js"></script>
+{% endblock %} {% block body %}
+<h1>Document: {{document[2]}}</h1>
+<p><strong>Last edited:</strong> {{document[4]}}</p>
+<div id="toolbar">
+  <span class="ql-formats">
+    <select class="ql-font"></select>
+    <select class="ql-size"></select>
+  </span>
+  <span class="ql-formats">
+    <button class="ql-bold"></button>
+    <button class="ql-italic"></button>
+    <button class="ql-underline"></button>
+    <button class="ql-strike"></button>
+  </span>
+  <span class="ql-formats">
+    <button class="ql-list" value="ordered"></button>
+    <button class="ql-list" value="bullet"></button>
+    <button class="ql-blockquote"></button>
+    <button class="ql-code-block"></button>
+  </span>
+  <span class="ql-formats">
+    <select class="ql-align"></select>
+    <select class="ql-color"></select>
+    <select class="ql-background"></select>
+  </span>
+  <span class="ql-formats">
+    <button class="ql-clean"></button>
+  </span>
+  <!-- Save Button -->
+  <span class="ql-formats">
+    <button id="saveBtn" class="ql-save">Save</button>
+  </span>
+
+  <span class "ql-formats">
+    <label for="imageUpload" class="ql-image-upload"
+        >Transcribe handwritten text📷</label>
+    <input type="file" id="imageUpload" accept="image/*" style="display: none" />
+  </span>
+</div>
+
+<div id="editor">
+  <script>
+    // load saved document from the server
+    const initialContent = `{{ document_text | safe }}`;
+    // init quill editor
+    const quill = new Quill("#editor", {
+      theme: "snow",
+      placeholder: "Write something awesome here...",
+      modules: {
+        toolbar: "#toolbar",
+      },
+    });
+    quill.clipboard.dangerouslyPasteHTML(initialContent);
+
+    document
+      .getElementById("imageUpload")
+      .addEventListener("change", function (event) {
+        let file = event.target.files[0];
+        if (!file) return;
+        let formData = new FormData();
+        formData.append("file", file);
+        fetch("/extract_text", {
+          method: "POST",
+          body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.text) {
+            quill.insertText(quill.getLength(), data.text + "\n");
+          }
+          else {
+            alert("Error " + data.error);
+          }
+        })
+        .catch(error => console.error("Error:", error));
+      });
+  </script>
+</div>
+
+<p id="ocrStatus"></p>
+
+{% endblock %} {% block scripts %}
+<link
+  href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css"
+  rel="stylesheet"
+/>
+{% endblock %}

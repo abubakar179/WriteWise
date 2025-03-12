@@ -1,0 +1,2 @@
+# WriteWise
+AI-enhanced notetaking
