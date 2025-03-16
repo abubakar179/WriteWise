@@ -1,2 +1,2 @@
 # WriteWise
-AI-enhanced notetaking
+AI-enhanced notetaking for the masses
