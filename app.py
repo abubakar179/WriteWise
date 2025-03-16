@@ -8,7 +8,7 @@ import pytesseract
 from PIL import Image
 
 app = Flask(__name__)
-app.secret_key = 'e3f2f00e45f740919a484652c0871b5a'
+app.secret_key = "INSERT KEY HERE"
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 class UserAuth:
