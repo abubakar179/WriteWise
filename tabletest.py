@@ -93,7 +93,7 @@ def test_database():
     except Exception as e:
         print("❌ Failed to insert valid document data", e)
     
-        # 2. Null document titles are rejected
+    # 2. Null document titles are rejected
     try:
         cursor.execute("INSERT INTO documents (folder_id, document_title, document_text, last_edited) VALUES (?, ?, ?, ?)", (1, None, "text", datetime.datetime.now()))
         print("❌ Failed to reject null document title")

@@ -25,7 +25,7 @@
     <p>Document title: <input type="text" name="document_title" required /></p>
     <p>
       Folder:
-      <select name="folder_id" id="folderSelect" required>
+      <select name="folder_id" id="folderSelect" required autocomplete="off">
         <option value="" disabled selected>Select a folder</option>
         <option value="new">Create a new folder</option>
         {% for folder in user_folders %}
@@ -56,61 +56,37 @@
   {% endif %}
 </div>
 
-<div id="folder-contents">
+<div id="folder-contents" style="display: none">
   <h3>Folder Contents</h3>
   <ul id="folder-doc-list"></ul>
 </div>
 
-{% endblock %} {% block scripts %}
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // for dashboard: check if "create new folder" was selected
-  const newFolderInput = document.getElementById("newFolderInput");
-  const folderSelect = document.getElementById("folderSelect");
+  const newFolderInput = document.getElementById("newFolderInput"); // the hidden new folder name field
+  const folderSelect = document.getElementById("folderSelect"); // selected item in the drop down list
+  folderSelect.value = ""; // Reset to default option
+  let folderButtons = document.querySelectorAll(".folder-btn");
+  checkFolderSelection(); // Ensure the input field is hidden
 
   function checkFolderSelection() {
     if (folderSelect.value === "new") {
-      newFolderInput.style.display = "block";
+      newFolderInput.style.display = "block"; // display newFolderInput if the “create new folder” option is selected
     } else {
       newFolderInput.style.display = "none";
     }
   }
 
-  checkFolderSelection();
-
   folderSelect.addEventListener("change", function () {
+    // listen for when an input (i.e. the dropdown) is modified
     checkFolderSelection();
   });
 
-  const folderButtons = document.querySelectorAll(".folder-btn");
-  const folderContents = document.getElementById("folder-doc-list");
-
-  folderButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const folderId = this.dataset.folderId;
-
-      fetch(`/fetch_folder_contents/${folderId}`)
-        .then((response) => response.json())
-        .then((data) => {
-          folderContents.innerHTML = ""; // Clear previous content
-
-          if (data.documents.length === 0) {
-            folderContents.innerHTML = "<p>No documents found in this folder.</p>";
-            return;
-          }
-
-          data.documents.forEach((doc) => {
-            const li = document.createElement("li");
-            const link = document.createElement("a");
-            link.href = `/view_document/${doc[0]}`;
-            link.textContent = doc[1];
-            li.appendChild(link);
-            folderContents.appendChild(li);
-          });
-        })
-        .catch((error) => console.error("Error loading folder contents:", error));
+  
+  folderButtons.forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      let folderId = btn.getAttribute(data-folder-id);
     });
   });
-});
 </script>
+
 {% endblock %}

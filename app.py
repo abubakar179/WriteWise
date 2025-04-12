@@ -3,7 +3,6 @@ from flask import Flask, redirect, url_for, render_template, request, session, j
 import bcrypt
 from datetime import datetime, timedelta, timezone
 import uuid
-import bleach
 import pytesseract
 from PIL import Image
 
@@ -110,10 +109,10 @@ class Documents:
             cursor = conn.cursor()
             if folder_id == "new" and new_folder_name:
                 cursor.execute("INSERT INTO folders (user_id, folder_title) VALUES (?, ?)", (user_id, new_folder_name))
-                conn.commit()
+                cursor.execute("SELECT folder_id FROM folders WHERE folder_title = ?", (new_folder_name,))
                 folder_id = cursor.lastrowid
-                cursor.execute("INSERT INTO documents (folder_id, document_title, document_text, last_edited) VALUES (?, ?, ?, CURRENT_TIMESTAMP)",(folder_id, document_title, ""))
-                conn.commit()
+            cursor.execute("INSERT INTO documents (folder_id, document_title, document_text, last_edited) VALUES (?, ?, ?, CURRENT_TIMESTAMP)",(folder_id, document_title, "",))
+            conn.commit()
 
     def viewDoc(self, document_id, user_id):
         with self._connect() as conn:
@@ -149,7 +148,7 @@ class Folders:
             cursor.execute("SELECT folder_id, folder_title FROM folders WHERE user_id = ?", (user_id,))
             user_folders = cursor.fetchall()
             return user_folders
-
+    
 auth = UserAuth()
 doc = Documents()
 folder = Folders()
@@ -188,6 +187,15 @@ def dashboard():
     user_id = session["user_id"]
     return render_template("dashboard.html", username=username, recent_documents=doc.fetchDocs(user_id), user_folders = folder.fetchFolders(user_id))
 
+@app.route("/get_folder_contents/<int:folder_id>")
+def get_folder_contents(folder_id):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT document_id, document_title FROM documents WHERE folder_id = ?", (folder_id,))
+    documents = cursor.fetchall()
+    conn.close()
+    return jsonify(documents)
+
 @app.route("/logout")
 def logout():
     user_id = session["user_id"]
@@ -208,8 +216,9 @@ def create_document():
     new_folder_name = request.form["new_folder_name"].strip()
     if not document_title:
         return "Document title is required", 400
-    if folder_id == "new" and not new_folder_name or new_folder_name=="":
-        return "New folder name is required", 400
+    if folder_id == "new":
+        if not new_folder_name.strip():
+            return "New folder name is required", 400
     doc.createDoc(user_id, document_title, folder_id, new_folder_name)
     return redirect(url_for("dashboard"))
 
