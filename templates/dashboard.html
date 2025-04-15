@@ -64,8 +64,10 @@
 <script>
   const newFolderInput = document.getElementById("newFolderInput"); // the hidden new folder name field
   const folderSelect = document.getElementById("folderSelect"); // selected item in the drop down list
-  folderSelect.value = ""; // Reset to default option
   let folderButtons = document.querySelectorAll(".folder-btn");
+  const folderContents = document.getElementById("folder-contents");
+  folderContents.style.display = "none"; // hide folder contents
+  folderSelect.value = ""; // Reset to default option
   checkFolderSelection(); // Ensure the input field is hidden
 
   function checkFolderSelection() {
@@ -76,15 +78,39 @@
     }
   }
 
-  folderSelect.addEventListener("change", function () {
-    // listen for when an input (i.e. the dropdown) is modified
+  folderSelect.addEventListener("change", function () { // listen for when an input (i.e. the dropdown) is modified
     checkFolderSelection();
   });
 
   
-  folderButtons.forEach(function(btn) {
-    btn.addEventListener("click", function() {
-      let folderId = btn.getAttribute(data-folder-id);
+  folderButtons.forEach(function(btn) { // for btn in folderButtons
+    btn.addEventListener("click", function() { // listen for when the button is clicked
+      let folderId = btn.getAttribute("data-folder-id");
+      const folderDocList = document.getElementById("folder-doc-list");
+      const folderContents = document.getElementById("folder-contents");
+      folderDocList.innerHTML = "";
+      folderContents.style.display = "block";
+
+      fetch(`/get_folder_contents/${folderId}`)
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(data) {
+          console.log(data);
+        })
+        // .then(function(data) {
+        //   data.forEach(function(item) {
+        //     let id = item[0];
+        //     let title = item[1];
+        //     let li = document.createElement("li");
+        //     let link = document.createElement("a");
+        //     link.href = `/view_document/${id}`;
+        //     link.textContent = title;
+        //     li.appendChild(link);
+        //     folderDocList.appendChild(li);
+        //   })
+        //})
+        .catch(error => console.error(error));
     });
   });
 </script>

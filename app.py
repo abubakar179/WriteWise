@@ -148,7 +148,14 @@ class Folders:
             cursor.execute("SELECT folder_id, folder_title FROM folders WHERE user_id = ?", (user_id,))
             user_folders = cursor.fetchall()
             return user_folders
-    
+        
+    def getFolder(self, user_id, folder_id):
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM folders WHERE user_id = ? AND folder_id = ?", (user_id, folder_id))
+            folder_data = cursor.fetchone()
+            return folder_data
+
 auth = UserAuth()
 doc = Documents()
 folder = Folders()
@@ -189,12 +196,20 @@ def dashboard():
 
 @app.route("/get_folder_contents/<int:folder_id>")
 def get_folder_contents(folder_id):
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT document_id, document_title FROM documents WHERE folder_id = ?", (folder_id,))
-    documents = cursor.fetchall()
-    conn.close()
-    return jsonify(documents)
+   if "user_id" not in session: #safeguard route from not signed in users
+        return redirect(url_for("login"))
+   user_id = session["user_id"]
+   folder_data = folder.getFolder(user_id, folder_id)
+   if folder: # safeguard route from unauthorised users
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT document_id, document_title FROM documents WHERE folder_id = ?", (folder_id,))
+        documents = cursor.fetchall()
+        conn.close()   
+        return jsonify(documents)
+   else:
+       return "Unauthorised or folder not found", 404
+    
 
 @app.route("/logout")
 def logout():
@@ -228,7 +243,7 @@ def view_document(document_id):
         return redirect(url_for("login"))
    user_id = session["user_id"]
    document = doc.viewDoc(document_id, user_id)
-   if document:
+   if document: # safeguard document from unauthorised users
         return render_template("view_document.html", document=document, document_text = document[3])
    else:
        return "Unauthorised or document not found", 404
