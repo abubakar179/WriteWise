@@ -22,13 +22,4 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch((error) => alert("Network error."));
   });
-
-  // handling folder clicks
-  const folderItems = document.querySelector(".folder-btn");
-  folderItems.array.forEach((element) => {
-    element.addEventListener("click", function () {
-      const folderId = this.getAttribute("data-folder-id");
-      fetch(`/get_folder/$`);
-    });
-  });
 });

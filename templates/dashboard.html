@@ -5,7 +5,7 @@
 <div class="recent-documents">
   <h2>Your recent documents:</h2>
   {% if recent_documents %}
-  <ul>
+  <ul id="recent-docs-container">
     {% for doc in recent_documents %}
     <li>
       <a href="{{ url_for('view_document', document_id=doc[0]) }}"
@@ -52,7 +52,7 @@
     {% endfor %}
   </ul>
   {% else %}
-  <p>No folders found. Create one above!</p>
+  <p>No folders found. Create one now!</p>
   {% endif %}
 </div>
 
@@ -78,39 +78,144 @@
     }
   }
 
-  folderSelect.addEventListener("change", function () { // listen for when an input (i.e. the dropdown) is modified
+  folderSelect.addEventListener("change", function () {
+    // listen for when an input (i.e. the dropdown) is modified
     checkFolderSelection();
   });
 
-  
-  folderButtons.forEach(function(btn) { // for btn in folderButtons
-    btn.addEventListener("click", function() { // listen for when the button is clicked
+  folderButtons.forEach(function (btn) {
+    // for btn in folderButtons
+    btn.addEventListener("click", function () {
+      // listen for when the button is clicked
       let folderId = btn.getAttribute("data-folder-id");
       const folderDocList = document.getElementById("folder-doc-list");
       const folderContents = document.getElementById("folder-contents");
+
+      // Reset text formatting and folder contents before displaying alongside highlighted folder title
       folderDocList.innerHTML = "";
       folderContents.style.display = "block";
+      folderButtons.forEach(function (btn) {
+        btn.style.color = "black";
+        btn.style.fontWeight = "normal";
+      });
+      btn.style.color = "blue";
+      btn.style.fontWeight = "bold";
+
+      // delete any old delete links
+      const oldDeleteLink = folderContents.querySelector(
+        "a[data-delete-folder]"
+      );
+      if (oldDeleteLink) {
+        oldDeleteLink.remove();
+      }
+
+      // create delete folder link
+      let deleteFolder = document.createElement("a");
+      deleteFolder.textContent = "Delete " + btn.innerText;
+      deleteFolder.setAttribute("data-delete-folder", "true");
+      folderContents.insertBefore(deleteFolder, folderDocList);
+
+      // listen for when the delete folder link is clicked, send fetch delete requestss
+
+      deleteFolder.addEventListener("click", function () {
+        fetch(`/delete_folder/${folderId}`, { method: "DELETE" })
+          .then(function (response) {
+            if (response.ok) {
+              btn.remove();
+              folderContents.innerHTML = "<p>No folders found. Create one now!</p>";
+
+              fetch(`/recent_documents/`)
+                .then((response) => response.json())
+                .then(function (data) {
+                  const recentDocsContainer = document.getElementById(
+                    "recent-docs-container"
+                  );
+                  recentDocsContainer.innerHTML = "";
+
+                  data.forEach(function (doc) {
+                    const li = document.createElement("li");
+                    li.textContent = doc.document_title;
+                    const a = document.createElement("a");
+                          a.textContent = doc.document_title;
+                          a.href = `/view_document/${doc.document_id}`
+                          li.appendChild(a);
+                    recentDocsContainer.appendChild(li);
+                  });
+                })
+                .catch((error) =>
+                  console.error("Error updating recent documents:", error)
+                );
+            } else {
+              console.error("Failed to delete folder");
+            }
+          })
+          .catch((error) => console.error("Delete error:", error));
+      });
+
+      console.log("Attempting to fetch folder:", folderId);
 
       fetch(`/get_folder_contents/${folderId}`)
-        .then(function(response) {
+        .then(function (response) {
+          if (!response.ok) throw new Error("Failed to reach folder contents");
           return response.json();
         })
-        .then(function(data) {
-          console.log(data);
+
+        .then(function (data) {
+          data.forEach(function (item) {
+            let docId = item[0];
+            let title = item[1];
+            let li = document.createElement("li");
+            let link = document.createElement("a");
+            let deleteBtn = document.createElement("button");
+
+            link.href = `/view_document/${docId}`;
+            link.textContent = title;
+            li.appendChild(link);
+
+            deleteBtn.textContent = "Delete";
+            deleteBtn.style.marginLeft = "50px";
+
+            deleteBtn.addEventListener("click", function () {
+              fetch(`/delete_document/${docId}`, { method: "DELETE" })
+                .then(function (response) {
+                  if (response.ok) {
+                    li.remove();
+
+                    fetch(`/recent_documents/`)
+                      .then((response) => response.json())
+                      .then(function (data) {
+                        const recentDocsContainer = document.getElementById(
+                          "recent-docs-container"
+                        );
+                        recentDocsContainer.innerHTML = "";
+
+                        data.forEach(function (doc) {
+                          const li = document.createElement("li");
+                          const a = document.createElement("a");
+                          a.textContent = doc.document_title;
+                          a.href = `/view_document/${doc.document_id}`
+                          li.appendChild(a);
+                          recentDocsContainer.appendChild(li);
+                        });
+                      })
+                      .catch((error) =>
+                        console.error("Error updating recent documents:", error)
+                      )
+
+                      .catch((error) => console.error("Delete error:", error));
+                  } else {
+                    console.error("Failed to delete file");
+                  }
+                })
+                .catch((error) => console.error("Delete error:", error));
+            });
+
+            li.appendChild(deleteBtn);
+            folderDocList.appendChild(li);
+          });
         })
-        // .then(function(data) {
-        //   data.forEach(function(item) {
-        //     let id = item[0];
-        //     let title = item[1];
-        //     let li = document.createElement("li");
-        //     let link = document.createElement("a");
-        //     link.href = `/view_document/${id}`;
-        //     link.textContent = title;
-        //     li.appendChild(link);
-        //     folderDocList.appendChild(li);
-        //   })
-        //})
-        .catch(error => console.error(error));
+
+        .catch((error) => console.error("Error loading documents:", error));
     });
   });
 </script>
