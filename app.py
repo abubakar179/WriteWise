@@ -5,23 +5,12 @@ from datetime import datetime, timedelta, timezone
 import uuid
 import pytesseract
 from PIL import Image
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
-from Crypto.Random import get_random_bytes
-import base64
 import os
 
 app = Flask(__name__)
 app.secret_key = "INSERT KEY HERE"
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-class Encryption:
-    def __init__(self, password):
-        self.password = password
-        self.key = generate_key(password)
-
-    def generate_key(self, password):
-        return
 
 class UserAuth:
 
