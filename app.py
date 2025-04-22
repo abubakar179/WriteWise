@@ -5,10 +5,23 @@ from datetime import datetime, timedelta, timezone
 import uuid
 import pytesseract
 from PIL import Image
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Random import get_random_bytes
+import base64
+import os
 
 app = Flask(__name__)
 app.secret_key = "INSERT KEY HERE"
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+class Encryption:
+    def __init__(self, password):
+        self.password = password
+        self.key = generate_key(password)
+
+    def generate_key(self, password):
+        return
 
 class UserAuth:
 
@@ -334,7 +347,7 @@ def view_document(document_id):
    user_id = session["user_id"]
    document = doc.viewDoc(document_id, user_id)
    if document: # safeguard document from unauthorised users
-        return render_template("view_document.html", document=document, document_text = document[3])
+        return render_template("view_document.html", document=document)
    else:
        return "Unauthorised or document not found", 404
 

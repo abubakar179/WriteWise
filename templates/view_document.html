@@ -1,90 +1,81 @@
 {% extends "layout.html" %} {% block title %} {{ document[2] }} | WriteWise {%
-endblock %} {% block styles %}
-<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js"></script>
-{% endblock %} {% block body %}
+endblock %} {% block body %}
+
 <h1>Document: {{document[2]}}</h1>
 <p><strong>Last edited:</strong> {{document[4]}}</p>
+
 <div id="toolbar">
   <span class="ql-formats">
-    <select class="ql-font"></select>
-    <select class="ql-size"></select>
+    <select class="ql-size">
+      <!-- text size -->
+      <option value="small"></option>
+      <option value="large"></option>
+      <option value="huge"></option>
+    </select>
   </span>
+
   <span class="ql-formats">
     <button class="ql-bold"></button>
     <button class="ql-italic"></button>
     <button class="ql-underline"></button>
-    <button class="ql-strike"></button>
   </span>
+
   <span class="ql-formats">
     <button class="ql-list" value="ordered"></button>
     <button class="ql-list" value="bullet"></button>
     <button class="ql-blockquote"></button>
     <button class="ql-code-block"></button>
+    <button class="ql-align"></button>
   </span>
+
   <span class="ql-formats">
-    <select class="ql-align"></select>
     <select class="ql-color"></select>
     <select class="ql-background"></select>
   </span>
-  <span class="ql-formats">
-    <button class="ql-clean"></button>
-  </span>
-  <!-- Save Button -->
-  <span class="ql-formats">
-    <button id="saveBtn" class="ql-save">Save</button>
-  </span>
 
-  <span class "ql-formats">
-    <label for="imageUpload" class="ql-image-upload"
-        >Transcribe handwritten text📷</label>
-    <input type="file" id="imageUpload" accept="image/*" style="display: none" />
+  <span class="ql-formats">
+    <label id="transBtn">Transcribe image 📷</label>
+    <label id="saveBtn">Save {{document[2]}} 💾</label>
   </span>
 </div>
+<div id="editor"></div>
 
-<div id="editor">
-  <script>
-    // load saved document from the server
-    const initialContent = `{{ document_text | safe }}`;
-    // init quill editor
-    const quill = new Quill("#editor", {
-      theme: "snow",
-      placeholder: "Write something awesome here...",
-      modules: {
-        toolbar: "#toolbar",
-      },
-    });
-    quill.clipboard.dangerouslyPasteHTML(initialContent);
-
-    document
-      .getElementById("imageUpload")
-      .addEventListener("change", function (event) {
-        let file = event.target.files[0];
-        if (!file) return;
-        let formData = new FormData();
-        formData.append("file", file);
-        fetch("/extract_text", {
-          method: "POST",
-          body: formData,
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.text) {
-            quill.insertText(quill.getLength(), data.text + "\n");
-          }
-          else {
-            alert("Error " + data.error);
-          }
-        })
-        .catch(error => console.error("Error:", error));
-      });
-  </script>
-</div>
-
-<p id="ocrStatus"></p>
-
-{% endblock %} {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js"></script>
 <link
   href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css"
   rel="stylesheet"
 />
+
+<script>
+  const initialContent = `{{ document[3] | safe }}`;
+  const quill = new Quill("#editor", {
+    theme: "snow",
+    placeholder: "Write something awesome here...",
+    modules: {
+      toolbar: "#toolbar",
+    },
+  });
+  quill.clipboard.dangerouslyPasteHTML(initialContent);
+
+  document.getElementById("saveBtn").addEventListener("click", function () {
+    const documentId = window.location.pathname.split("/").pop(); // get document id from URL
+    const documentText = quill.root.innerHTML; // save document text as raw HTML (preserve formatting)
+
+    fetch("/save_document", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        document_id: documentId,
+        document_text: documentText,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) alert("Document saved successfully!");
+        else alert("Error saving document.");
+      })
+      .catch((error) => alert("Network error."));
+  });
+</script>
+
 {% endblock %}
