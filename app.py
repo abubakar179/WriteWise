@@ -385,4 +385,10 @@ def extract_text():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
+    print("Current directory contents:", os.listdir("."))
+    if not os.path.exists("database.db"):
+        print("⚠️ database.db NOT FOUND in current directory.")
+    else:
+        print("✅ database.db found.")
     app.run(host="0.0.0.0", port=5000, debug=True)
+
