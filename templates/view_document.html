@@ -63,7 +63,7 @@ endblock %} {% block body %}
 
     fetch("/save_document", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         document_id: documentId,
         document_text: documentText,
@@ -76,6 +76,27 @@ endblock %} {% block body %}
       })
       .catch((error) => alert("Network error."));
   });
+  document
+    .getElementById("imageUpload")
+    .addEventListener("change", function (event) {
+      let file = event.target.files[0];
+      if (!file) return;
+      let formData = new FormData();
+      formData.append("file", file);
+      fetch("/extract_text", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.text) {
+            quill.insertText(quill.getLength(), data.text + "\n");
+          } else {
+            alert("Error " + data.error);
+          }
+        })
+        .catch((error) => console.error("Error:", error));
+    });
 </script>
 
 {% endblock %}
