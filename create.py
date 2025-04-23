@@ -1,7 +1,7 @@
 import sqlite3
 
 def create_tables():
-    connection = sqlite3.connect("database.db")
+    connection = sqlite3.connect("/app/database/database.db")
     cursor = connection.cursor()
 
     cursor.execute("""
@@ -53,6 +53,7 @@ def create_tables():
 
     connection.commit()
     connection.close()
+    print("Database created successfully.")
 
 if __name__ == "__main__":
     create_tables()

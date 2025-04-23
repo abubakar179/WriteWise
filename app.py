@@ -6,6 +6,9 @@ import uuid
 import pytesseract
 from PIL import Image
 import os
+if not os.path.exists("/app/database/database.db"):
+    from create import create_tables
+    create_tables()
 
 app = Flask(__name__)
 app.secret_key = "INSERT KEY HERE"
@@ -14,7 +17,7 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 
 class UserAuth:
 
-    def __init__(self, db_path="database.db"):
+    def __init__(self, db_path="/app/database/database.db"):
         self.db_path = db_path
 
     def _connect(self):
@@ -88,7 +91,7 @@ class UserAuth:
     
 class Documents:
     
-    def __init__(self, db_path="database.db"):
+    def __init__(self, db_path="/app/database/database.db"):
         self.db_path = db_path
 
     def _connect(self):
@@ -145,7 +148,7 @@ class Documents:
             conn.commit()
 
 class Folders:
-    def __init__(self, db_path="database.db"):
+    def __init__(self, db_path="/app/database/database.db"):
         self.db_path = db_path
 
     def _connect(self):
@@ -197,7 +200,7 @@ def dashboard():
     if "user_id" not in session: #safeguard route from not signed in users
         return redirect(url_for("login"))
     
-    with sqlite3.connect("database.db") as conn:
+    with sqlite3.connect("/app/database/database.db") as conn:
         cursor = conn.cursor() 
         cursor.execute('PRAGMA foreign_keys = ON')
         cursor.execute("SELECT username FROM users WHERE user_id=?", (session["user_id"],))
@@ -214,7 +217,7 @@ def dashboard():
 def logout():
     user_id = session["user_id"]
     session.clear()  # Remove session from browser
-    with sqlite3.connect("database.db") as conn:
+    with sqlite3.connect("/app/database/database.db") as conn:
         cursor = conn.cursor()
         cursor.execute('PRAGMA foreign_keys = ON')
         cursor.execute("DELETE FROM sessions WHERE user_id=?", (user_id,))
@@ -231,7 +234,7 @@ def get_folder_contents(folder_id):
 
    if folder_data: # safeguard route from unauthorised users
         try:
-            conn = sqlite3.connect("database.db")
+            conn = sqlite3.connect("/app/database/database.db")
             cursor = conn.cursor()
             cursor.execute('PRAGMA foreign_keys = ON')
             cursor.execute("SELECT document_id, document_title FROM documents WHERE folder_id = ?", (folder_id,))
@@ -253,7 +256,7 @@ def delete_document(document_id):
     
     # check document belongs to user
     user_id = session["user_id"]
-    with sqlite3.connect("database.db") as conn:
+    with sqlite3.connect("/app/database/database.db") as conn:
         cursor = conn.cursor()
         cursor.execute('PRAGMA foreign_keys = ON')
         cursor.execute("""
@@ -280,7 +283,7 @@ def delete_folder(folder_id):
     
     # check folder belongs to user
     user_id = session["user_id"]
-    with sqlite3.connect("database.db") as conn:
+    with sqlite3.connect("/app/database/database.db") as conn:
         conn.execute('PRAGMA foreign_keys = ON')
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM folders WHERE folder_id = ? and user_id = ?", (folder_id, user_id))
@@ -375,7 +378,7 @@ def extract_text():
 
 if __name__ == "__main__":
     print("Current directory contents:", os.listdir("."))
-    if not os.path.exists("database.db"):
+    if not os.path.exists("/app/database/database.db"):
         print("⚠️ database.db NOT FOUND in current directory.")
     else:
         print("✅ database.db found.")
