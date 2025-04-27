@@ -36,6 +36,12 @@ endblock %} {% block body %}
   <span class="ql-formats">
     <label id="transBtn">Transcribe image 📷</label>
     <label id="saveBtn">Save {{document[2]}} 💾</label>
+    <input
+      type="file"
+      id="imageUpload"
+      accept="image/*"
+      style="display: none"
+    />
   </span>
 </div>
 <div id="editor"></div>
@@ -76,13 +82,16 @@ endblock %} {% block body %}
       })
       .catch((error) => alert("Network error."));
   });
+  document;
   document
     .getElementById("imageUpload")
     .addEventListener("change", function (event) {
       let file = event.target.files[0];
       if (!file) return;
+
       let formData = new FormData();
       formData.append("file", file);
+
       fetch("/extract_text", {
         method: "POST",
         body: formData,
@@ -90,13 +99,17 @@ endblock %} {% block body %}
         .then((response) => response.json())
         .then((data) => {
           if (data.text) {
-            quill.insertText(quill.getLength(), data.text + "\n");
-          } else {
-            alert("Error " + data.error);
+            quill.clipboard.dangerouslyPasteHTML(data.text); // insert extracted text into editor
+          } else if (data.error) {
+            alert("Error: " + data.error);
           }
         })
-        .catch((error) => console.error("Error:", error));
+        .catch((error) => alert("Network error: " + error));
     });
+
+  document.getElementById("transBtn").addEventListener("click", function () {
+    document.getElementById("imageUpload").click(); // triggers file picker
+  });
 </script>
 
 {% endblock %}

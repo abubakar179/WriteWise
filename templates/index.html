@@ -1,13 +1,17 @@
 {% extends "layout.html" %} {% block title %}WriteWise{% endblock %} {% block
 body %}
-<h2>AI-ENHANCED NOTETAKING</h2>
-<h1>MEANS MORE TIME LEARNING.</h1>
+<h1 style="margin-top: 30px;">Welcome to WriteWise!</h1>
 <p>
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam ullamcorper
-  sapien eget arcu hendrerit, quis feugiat sapien fringilla. Donec ac aliquam
-  metus. Nunc aliquam, nisi non volutpat interdum, arcu odio molestie sem, vel
-  aliquet nisi felis et erat. Donec eleifend odio at metus volutpat, et gravida
-  nibh tristique.
+AI-powered notetaking for the masses - create, edit, and extract text from images with ease.
 </p>
+
+<p>
+  Start by logging in or creating an account
+</p>
+
+<div style="margin-top: 20px;">
+  <a href="{{ url_for('login') }}">Login</a>
+  <a href="{{ url_for('register') }}">Register</a>
+</div>
 
 {% endblock %}

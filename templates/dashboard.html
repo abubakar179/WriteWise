@@ -48,7 +48,7 @@
   {% if user_folders %}
   <ul>
     {% for folder in user_folders %}
-    <li class="folder-btn" data-folder-id="{{ folder[0] }}">{{ folder[1] }}</li>
+    <button class="folder-btn" data-folder-id="{{ folder[0] }}">{{ folder[1] }}</li>
     {% endfor %}
   </ul>
   {% else %}
