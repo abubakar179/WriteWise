@@ -4,5 +4,3 @@ Pillow
 bcrypt
 datetime
 uuid
-bleach
-pycryptodome

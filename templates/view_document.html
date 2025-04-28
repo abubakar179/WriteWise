@@ -97,13 +97,16 @@ endblock %} {% block body %}
         body: formData,
       })
         .then((response) => response.json())
-        .then((data) => {
-          if (data.text) {
-            quill.clipboard.dangerouslyPasteHTML(data.text); // insert extracted text into editor
-          } else if (data.error) {
-            alert("Error: " + data.error);
-          }
-        })
+          .then((data) => {
+            console.log(data);
+            if (data.text.length > 0) {
+              quill.clipboard.dangerouslyPasteHTML(quill.getLength(), data.text); // insert extracted text into editor
+            } else if (data.error) {
+              alert("Error: " + data.error);
+            } else {
+              alert("No text found in image");
+            }
+          })
         .catch((error) => alert("Network error: " + error));
     });
 

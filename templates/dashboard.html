@@ -1,6 +1,7 @@
 {% extends "layout.html" %} {% block title %}Dashboard | WriteWise{% endblock %}
 {% block body %}
 <h1>Welcome {{ username }}!</h1>
+<a href="{{ url_for('logout') }}">Sign out</a>
 
 <div class="recent-documents">
   <h2>Your recent documents:</h2>
@@ -46,11 +47,9 @@
 <div id="browse-folders">
   <h2>Browse folders:</h2>
   {% if user_folders %}
-  <ul>
     {% for folder in user_folders %}
-    <button class="folder-btn" data-folder-id="{{ folder[0] }}">{{ folder[1] }}</li>
+    <button class="folder-btn" data-folder-id="{{ folder[0] }}">{{ folder[1] }}</button>
     {% endfor %}
-  </ul>
   {% else %}
   <p>No folders found. Create one now!</p>
   {% endif %}
@@ -121,8 +120,7 @@
         fetch(`/delete_folder/${folderId}`, { method: "DELETE" })
           .then(function (response) {
             if (response.ok) {
-              btn.remove();
-              folderContents.innerHTML = "<p>No folders found. Create one now!</p>";
+              location.reload();
 
               fetch(`/recent_documents/`)
                 .then((response) => response.json())

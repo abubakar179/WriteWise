@@ -23,7 +23,7 @@ class UserAuth:
         with self._connect() as conn:
             cursor = conn.cursor()
             cursor.execute('PRAGMA foreign_keys = ON')
-            cursor.execute("SELECT user_id, password_hash FROM users WHERE username=?", (username,))
+            cursor.execute("SELECT user_id, password_hash FROM users WHERE LOWER(username) = ?", (username,))
             
             row = cursor.fetchone()
 
@@ -75,7 +75,7 @@ class UserAuth:
             cursor.execute("SELECT email FROM users WHERE email=?", (email,))
             if cursor.fetchone():
                 return "Email already taken."
-            cursor.execute("SELECT username FROM users WHERE username=?", (username,))
+            cursor.execute("SELECT username FROM users WHERE LOWER(username)=?", (username,))
             if cursor.fetchone():
                 return "Username already taken."
             try:
@@ -177,7 +177,7 @@ def home():
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
-       username = request.form["username"]
+       username = request.form["username"].lower().strip()
        password = request.form["password"]
        return auth.validate_user(username, password)
     return render_template("login.html")
@@ -185,9 +185,9 @@ def login():
 @app.route("/register", methods=["POST", "GET"])
 def register():
     if request.method == "POST":
-        username = request.form["username"]
+        username = request.form["username"].lower().strip()
         password = request.form["password"]
-        email = request.form["email"]
+        email = request.form["email"].strip()
         return auth.register_user(username, password, email)
     return render_template("register.html")
 
@@ -211,6 +211,8 @@ def dashboard():
 
 @app.route("/logout")
 def logout():
+    if "user_id" not in session:
+        return redirect(url_for("home"))
     user_id = session["user_id"]
     session.clear()  # Remove session from browser
     with sqlite3.connect("database.db") as conn:
