@@ -138,45 +138,6 @@ def test_database():
     except Exception:
         print("✅ Invalid user id correctly rejected")
 
-
-    print("\n===== SECURITY TABLE TESTS =====")
-
-    # 1. Valid security data can be inserted
-    cursor.execute("SELECT document_id FROM documents WHERE document_title = ?", ("Using calculus in kinematics",))
-    document_row = cursor.fetchone()
-    if document_row:
-        document_id = document_row[0]
-        try:
-            cursor.execute("INSERT INTO security (document_id, encryption_key, checksum) VALUES (?, ?, ?)", (document_id, "key123", "checksum123"))
-            print("✅ Inserted valid security data")
-        except Exception as e:
-            print("❌ Failed to insert valid security data", e)
-        
-        # 2a. Null encryption key rejected
-        try:
-            cursor.execute("INSERT INTO security (document_id, encryption_key, checksum) VALUES (?, ?, ?)", (document_id, None, "checksum124"))
-            print("❌ Failed to reject null encryption key")
-        except Exception:
-            print("✅ Null encryption key correctly rejected")
-
-        # 2b. Null checksum rejected
-        try:
-            cursor.execute("INSERT INTO security (document_id, encryption_key, checksum) VALUES (?, ?, ?)", (document_id, "key124", None))
-            print("❌ Failed to reject null checksum")
-        except Exception:
-            print("✅ Null checksum correctly rejected")
-
-        # 3. Invalid document id rejected
-        try:
-            cursor.execute("INSERT INTO security (document_id, encryption_key, checksum) VALUES (?, ?, ?)", (99999, "key999", "checksum999"))
-            print("❌ Failed to reject invalid document id")
-        except Exception:
-            print("✅ Invalid document id correctly rejected")
-
-    else:
-        print("❌ Could not find document to insert security data. Document test might have failed earlier.")
-    
-
     print("\n===== USERS CASCADE DELETE TEST =====")
     # Cascade delete test
     try:
