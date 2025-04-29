@@ -1,7 +1,7 @@
 # 📝 WriteWise
-*AI-enhanced notetaking for the masses*
+*OCR-enhanced notetaking for the masses*
 
-WriteWise is a Flask-based web application that lets users create, edit, and organise rich-text documents in a simple, folder-based interface. Built with students and writers in mind, it also features image-to-text transcription (OCR) to bridge the gap between physical and digital notes.
+WriteWise is a Flask-based web application that lets users create, edit, and organise rich-text documents in a simple, folder-based interface. Built with students and writers in mind, it also features image-to-text transcription to bridge the gap between physical and digital notes.
 
 This project was developed as part of my A-Level Computer Science course in early 2025.
 
