@@ -42,15 +42,6 @@ def create_tables():
     )
     """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS security (
-        document_id INTEGER PRIMARY KEY,
-        encryption_key TEXT NOT NULL,
-        checksum TEXT NOT NULL,
-        FOREIGN KEY (document_id) REFERENCES documents(document_id) ON DELETE CASCADE
-    )
-    """)
-
     connection.commit()
     connection.close()
 
