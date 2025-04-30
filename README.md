@@ -48,7 +48,7 @@ Some features were planned but not fully implemented:
     ```bash
     python3 create.py
     ```
-5. ** Start Flask web server** (By default, the app runs at http://0.0.0.0:5000/.)
+5. **Start Flask web server** (By default, the app runs at http://0.0.0.0:5000/.)
     ```bash
     python3 app.py
     ```
