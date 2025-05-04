@@ -48,7 +48,15 @@ Some features were planned but not fully implemented:
     ```bash
     python3 create.py
     ```
-5. **Start Flask web server** (By default, the app runs at http://0.0.0.0:5000/.)
+5. **PLEASE SET A SECRET KEY - generate a UUID and paste it into app.py**
+    ```python
+   app = Flask(__name__)
+   app.secret_key = "INSERT KEY HERE"
+   pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+   ```
+6. **Install Tesseract**
+   The default path in app.py is the default Windows folder that Tesseract is stored. In order to install Tesseract, please use the binaries at https://github.com/UB-Mannheim/tesseract
+6. **Start Flask web server** (By default, the app runs at http://0.0.0.0:5000/.)
     ```bash
     python3 app.py
     ```
